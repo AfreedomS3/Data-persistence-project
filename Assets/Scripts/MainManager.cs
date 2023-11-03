@@ -11,21 +11,27 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
-    
+
     private bool m_Started = false;
     private int m_Points;
-    
+
     private bool m_GameOver = false;
 
-    
+
     // Start is called before the first frame update
     void Start()
     {
+        if (SessionData.Instance != null)
+        {
+            SetBestScore();
+        }
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -55,10 +61,29 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
+            if (m_Points > SessionData.Instance.bestScore)
+            {
+                SessionData.Instance.bestScore = m_Points;
+                SessionData.Instance.SaveBestScore();
+                SessionData.Instance.LoadBestScore();
+            }
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+        }
+    }
+
+    public void SetBestScore()
+    {
+        if (SessionData.Instance.bestScoreUser != "")
+        {
+            BestScoreText.text = $"Best Score: {SessionData.Instance.bestScoreUser} - {SessionData.Instance.bestScore}";
+        }
+        else
+        {
+            BestScoreText.text = "Best Score: " + SessionData.Instance.bestScore;
         }
     }
 
